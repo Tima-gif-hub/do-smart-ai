@@ -3,7 +3,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { TasksDashboard } from './TasksDashboard';
 import { AIAssistant } from '@/components/ai/AIAssistant';
 import { Task } from '@/types';
-import { mockTasksApi } from '@/lib/mockApi';
+import { tasksApi } from '@/lib/database';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
 
@@ -17,7 +17,7 @@ export const Dashboard: React.FC = () => {
 
   const loadTasks = async () => {
     try {
-      const data = await mockTasksApi.getTasks();
+      const data = await tasksApi.getTasks();
       setTasks(data);
     } catch (error) {
       console.error('Failed to load tasks:', error);
@@ -131,7 +131,7 @@ export const Dashboard: React.FC = () => {
   const renderMainContent = () => {
     switch (activeView) {
       case 'tasks':
-        return <TasksDashboard />;
+        return <TasksDashboard tasks={tasks} onTaskUpdate={setTasks} />;
       case 'analytics':
         return (
           <div className="flex-1 p-6 flex items-center justify-center">

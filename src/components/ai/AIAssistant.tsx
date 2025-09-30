@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Send, Bot, User } from 'lucide-react';
 import { AIMessage, Task } from '@/types';
-import { mockAIApi } from '@/lib/mockApi';
+import { aiApi } from '@/lib/database';
 
 interface AIAssistantProps {
   tasks: Task[];
@@ -46,7 +46,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ tasks }) => {
     setIsLoading(true);
 
     try {
-      const response = await mockAIApi.askAssistant(input, tasks);
+      const response = await aiApi.askAssistant(input, tasks);
       const assistantMessage: AIMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',

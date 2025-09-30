@@ -1,80 +1,118 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, AuthState } from '@/types';
-import { mockAuthApi } from '@/lib/mockApi';
+import { authApi } from '@/lib/database';
+import type { Session } from '@supabase/supabase-js';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  session: Session | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [authState, setAuthState] = useState<AuthState>({
     isAuthenticated: false,
     user: null,
     loading: true
   });
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
-    // Check if user is already authenticated on app load
-    const isAuth = mockAuthApi.isAuthenticated();
-    const user = mockAuthApi.getCurrentUser();
-    
-    setAuthState({
-      isAuthenticated: isAuth,
-      user,
-      loading: false
+    // Set up auth state listener
+    const { data: { subscription } } = authApi.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        
+        if (session?.user) {
+          const user: User = {
+            id: session.user.id,
+            email: session.user.email!,
+            name: session.user.user_metadata?.name || session.user.email!
+          };
+          
+          setAuthState({
+            isAuthenticated: true,
+            user,
+            loading: false
+          });
+        } else {
+          setAuthState({
+            isAuthenticated: false,
+            user: null,
+            loading: false
+          });
+        }
+      }
+    );
+
+    // Check for existing session
+    authApi.getSession().then((session) => {
+      setSession(session);
+      
+      if (session?.user) {
+        const user: User = {
+          id: session.user.id,
+          email: session.user.email!,
+          name: session.user.user_metadata?.name || session.user.email!
+        };
+        
+        setAuthState({
+          isAuthenticated: true,
+          user,
+          loading: false
+        });
+      } else {
+        setAuthState({
+          isAuthenticated: false,
+          user: null,
+          loading: false
+        });
+      }
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const login = async (email: string, password: string) => {
-    setAuthState(prev => ({ ...prev, loading: true }));
     try {
-      const { user } = await mockAuthApi.login(email, password);
-      setAuthState({
-        isAuthenticated: true,
-        user,
-        loading: false
-      });
+      await authApi.login(email, password);
+      // Auth state will be updated by the listener
     } catch (error) {
-      setAuthState(prev => ({ ...prev, loading: false }));
       throw error;
     }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    setAuthState(prev => ({ ...prev, loading: true }));
     try {
-      const { user } = await mockAuthApi.register(email, password, name);
-      setAuthState({
-        isAuthenticated: true,
-        user,
-        loading: false
-      });
+      await authApi.register(email, password, name);
+      // Auth state will be updated by the listener
     } catch (error) {
-      setAuthState(prev => ({ ...prev, loading: false }));
       throw error;
     }
   };
 
   const logout = async () => {
-    await mockAuthApi.logout();
-    setAuthState({
-      isAuthenticated: false,
-      user: null,
-      loading: false
-    });
+    try {
+      await authApi.logout();
+      // Auth state will be updated by the listener
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{
-      ...authState,
-      login,
-      register,
-      logout
-    }}>
+    <AuthContext.Provider 
+      value={{
+        ...authState,
+        login,
+        register,
+        logout,
+        session
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

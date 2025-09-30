@@ -1,23 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Search, Filter } from 'lucide-react';
-import { TaskCard } from '@/components/tasks/TaskCard';
-import { TaskForm } from '@/components/tasks/TaskForm';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState, useEffect } from 'react';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Plus, Search, Filter } from "lucide-react";
 import { Task } from '@/types';
-import { mockTasksApi } from '@/lib/mockApi';
-import { useToast } from '@/hooks/use-toast';
+import { TaskCard } from '@/components/tasks/TaskCard';
+import { tasksApi } from '@/lib/database';
+import { TaskForm } from '@/components/tasks/TaskForm';
+import { useToast } from "@/hooks/use-toast";
 
-export const TasksDashboard: React.FC = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [filteredTasks, setFilteredTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingTask, setEditingTask] = useState<Task | undefined>();
+interface TasksDashboardProps {
+  tasks: Task[];
+  onTaskUpdate?: (tasks: Task[]) => void;
+}
+
+export function TasksDashboard({ tasks: initialTasks, onTaskUpdate }: TasksDashboardProps) {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [filteredTasks, setFilteredTasks] = useState<Task[]>(tasks);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [priorityFilter, setPriorityFilter] = useState<string>('all');
+  const [showTaskForm, setShowTaskForm] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | undefined>(undefined);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -30,8 +35,9 @@ export const TasksDashboard: React.FC = () => {
 
   const loadTasks = async () => {
     try {
-      const data = await mockTasksApi.getTasks();
+      const data = await tasksApi.getTasks();
       setTasks(data);
+      onTaskUpdate?.(data);
     } catch (error) {
       toast({
         title: "Error loading tasks",
@@ -66,8 +72,11 @@ export const TasksDashboard: React.FC = () => {
 
   const handleCreateTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
     try {
-      const newTask = await mockTasksApi.createTask(taskData);
-      setTasks(prev => [newTask, ...prev]);
+      const newTask = await tasksApi.createTask(taskData);
+      const updatedTasks = [newTask, ...tasks];
+      setTasks(updatedTasks);
+      onTaskUpdate?.(updatedTasks);
+      setShowTaskForm(false);
       toast({
         title: "Task created",
         description: "Your new task has been created successfully.",
@@ -85,8 +94,10 @@ export const TasksDashboard: React.FC = () => {
     if (!editingTask) return;
     
     try {
-      const updatedTask = await mockTasksApi.updateTask(editingTask.id, taskData);
-      setTasks(prev => prev.map(task => task.id === editingTask.id ? updatedTask : task));
+      const updatedTask = await tasksApi.updateTask(editingTask.id, taskData);
+      const updatedTasks = tasks.map(task => task.id === editingTask.id ? updatedTask : task);
+      setTasks(updatedTasks);
+      onTaskUpdate?.(updatedTasks);
       setEditingTask(undefined);
       toast({
         title: "Task updated",
@@ -103,8 +114,10 @@ export const TasksDashboard: React.FC = () => {
 
   const handleDeleteTask = async (id: string) => {
     try {
-      await mockTasksApi.deleteTask(id);
-      setTasks(prev => prev.filter(task => task.id !== id));
+      await tasksApi.deleteTask(id);
+      const updatedTasks = tasks.filter(task => task.id !== id);
+      setTasks(updatedTasks);
+      onTaskUpdate?.(updatedTasks);
       toast({
         title: "Task deleted",
         description: "The task has been deleted successfully.",
@@ -125,8 +138,10 @@ export const TasksDashboard: React.FC = () => {
     const newStatus = task.status === 'completed' ? 'todo' : 'completed';
     
     try {
-      const updatedTask = await mockTasksApi.updateTask(id, { status: newStatus });
-      setTasks(prev => prev.map(t => t.id === id ? updatedTask : t));
+      const updatedTask = await tasksApi.updateTask(id, { status: newStatus });
+      const updatedTasks = tasks.map(t => t.id === id ? updatedTask : t);
+      setTasks(updatedTasks);
+      onTaskUpdate?.(updatedTasks);
       toast({
         title: newStatus === 'completed' ? "Task completed!" : "Task reopened",
         description: newStatus === 'completed' ? "Great job on completing this task!" : "Task moved back to your todo list.",
@@ -140,68 +155,53 @@ export const TasksDashboard: React.FC = () => {
     }
   };
 
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setIsFormOpen(true);
-  };
-
-  const handleCloseForm = () => {
-    setIsFormOpen(false);
-    setEditingTask(undefined);
-  };
-
-  const taskStats = {
-    total: tasks.length,
-    completed: tasks.filter(t => t.status === 'completed').length,
-    inProgress: tasks.filter(t => t.status === 'in-progress').length,
-    todo: tasks.filter(t => t.status === 'todo').length,
-  };
-
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading your tasks...</p>
+      <div className="space-y-4">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold">Tasks</h2>
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-card p-4 rounded-lg animate-pulse">
+              <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
+              <div className="h-3 bg-muted rounded w-1/2"></div>
+            </div>
+          ))}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 flex flex-col h-full">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="border-b border-border p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-2xl font-bold">Tasks</h1>
-            <p className="text-muted-foreground">
-              {taskStats.completed} of {taskStats.total} tasks completed
-            </p>
-          </div>
-          <Button
-            onClick={() => setIsFormOpen(true)}
-            className="bg-gradient-to-r from-primary to-primary-glow"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Button>
-        </div>
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-semibold">Tasks</h2>
+        <Button 
+          onClick={() => setShowTaskForm(true)}
+          className="flex items-center gap-2"
+        >
+          <Plus className="h-4 w-4" />
+          New Task
+        </Button>
+      </div>
 
-        {/* Filters */}
-        <div className="flex gap-4 items-center">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search tasks..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9"
-            />
-          </div>
-          
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+          <Input
+            placeholder="Search tasks..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        
+        <div className="flex gap-2">
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
@@ -213,67 +213,52 @@ export const TasksDashboard: React.FC = () => {
           </Select>
 
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-[140px]">
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Priority</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
               <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* Task Stats */}
-      <div className="p-6 border-b border-border">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-card p-4 rounded-lg border">
-            <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-2xl font-bold">{taskStats.total}</p>
-          </div>
-          <div className="bg-card p-4 rounded-lg border">
-            <p className="text-sm text-muted-foreground">To Do</p>
-            <p className="text-2xl font-bold text-muted-foreground">{taskStats.todo}</p>
-          </div>
-          <div className="bg-card p-4 rounded-lg border">
-            <p className="text-sm text-muted-foreground">In Progress</p>
-            <p className="text-2xl font-bold text-primary">{taskStats.inProgress}</p>
-          </div>
-          <div className="bg-card p-4 rounded-lg border">
-            <p className="text-sm text-muted-foreground">Completed</p>
-            <p className="text-2xl font-bold text-success">{taskStats.completed}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Tasks List */}
-      <div className="flex-1 overflow-y-auto p-6">
+      {/* Task List */}
+      <div className="space-y-4">
         {filteredTasks.length === 0 ? (
           <div className="text-center py-12">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted flex items-center justify-center">
+              <Filter className="h-8 w-8 text-muted-foreground" />
+            </div>
+            <h3 className="text-lg font-medium mb-2">No tasks found</h3>
             <p className="text-muted-foreground mb-4">
-              {tasks.length === 0 ? "No tasks yet. Create your first task!" : "No tasks match your filters."}
+              {tasks.length === 0 
+                ? "Create your first task to get started!" 
+                : "Try adjusting your filters or search term."
+              }
             </p>
             {tasks.length === 0 && (
-              <Button
-                onClick={() => setIsFormOpen(true)}
-                variant="outline"
+              <Button 
+                onClick={() => setShowTaskForm(true)}
+                className="flex items-center gap-2"
               >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Task
+                <Plus className="h-4 w-4" />
+                Create your first task
               </Button>
             )}
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid gap-4">
             {filteredTasks.map((task) => (
               <TaskCard
                 key={task.id}
                 task={task}
-                onEdit={handleEditTask}
-                onDelete={handleDeleteTask}
                 onToggleComplete={handleToggleComplete}
+                onEdit={(task) => setEditingTask(task)}
+                onDelete={handleDeleteTask}
               />
             ))}
           </div>
@@ -281,12 +266,20 @@ export const TasksDashboard: React.FC = () => {
       </div>
 
       {/* Task Form Modal */}
-      <TaskForm
-        task={editingTask}
-        isOpen={isFormOpen}
-        onClose={handleCloseForm}
-        onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
-      />
+      {(showTaskForm || editingTask) && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-background rounded-lg w-full max-w-md">
+            <TaskForm
+              task={editingTask}
+              onSubmit={editingTask ? handleUpdateTask : handleCreateTask}
+              onCancel={() => {
+                setShowTaskForm(false);
+                setEditingTask(undefined);
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
