@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_history: {
+        Row: {
+          created_at: string
+          id: string
+          query: string
+          response: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          query: string
+          response: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          query?: string
+          response?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           created_at: string
@@ -45,6 +99,36 @@ export type Database = {
           priority?: string
           status?: string
           title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_settings: {
+        Row: {
+          ai_response_style: string
+          created_at: string
+          id: string
+          language: string
+          theme: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_response_style?: string
+          created_at?: string
+          id?: string
+          language?: string
+          theme?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_response_style?: string
+          created_at?: string
+          id?: string
+          language?: string
+          theme?: string
           updated_at?: string
           user_id?: string
         }

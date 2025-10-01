@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Send, Bot, User } from 'lucide-react';
 import { AIMessage, Task } from '@/types';
 import { aiApi } from '@/lib/database';
+import { historyApi } from '@/lib/historyApi';
 
 interface AIAssistantProps {
   tasks: Task[];
@@ -54,6 +55,9 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ tasks }) => {
         timestamp: new Date().toISOString()
       };
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Save to history
+      await historyApi.saveInteraction(input, response);
     } catch (error) {
       const errorMessage: AIMessage = {
         id: (Date.now() + 1).toString(),
