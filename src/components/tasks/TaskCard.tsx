@@ -15,22 +15,22 @@ interface TaskCardProps {
 
 export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onToggleComplete }) => {
   const priorityColors = {
-    low: 'bg-muted text-muted-foreground',
-    medium: 'bg-warning/10 text-warning border-warning/20',
-    high: 'bg-destructive/10 text-destructive border-destructive/20'
+    low: 'bg-muted text-muted-foreground border-muted',
+    medium: 'bg-warning/10 text-warning border-warning/30',
+    high: 'bg-destructive/10 text-destructive border-destructive/30'
   };
 
   const statusColors = {
-    todo: 'bg-muted text-muted-foreground',
-    'in-progress': 'bg-primary/10 text-primary border-primary/20',
-    completed: 'bg-success/10 text-success border-success/20'
+    todo: 'bg-muted text-muted-foreground border-muted',
+    'in-progress': 'bg-primary/10 text-primary border-primary/30',
+    completed: 'bg-success/10 text-success border-success/30'
   };
 
   const isOverdue = task.dueDate && task.status !== 'completed' && isBefore(new Date(task.dueDate), new Date());
   const isCompleted = task.status === 'completed';
 
   return (
-    <Card className={`transition-all duration-200 hover:shadow-md ${isCompleted ? 'opacity-75' : ''} ${isOverdue ? 'border-destructive/50' : ''}`}>
+    <Card className={`transition-all duration-200 hover:shadow-lg ${isCompleted ? 'opacity-60' : ''} ${isOverdue ? 'border-destructive/40' : ''}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -88,7 +88,7 @@ export const TaskCard: React.FC<TaskCardProps> = ({ task, onEdit, onDelete, onTo
             variant={isCompleted ? "outline" : "default"}
             size="sm"
             onClick={() => onToggleComplete(task.id)}
-            className={isCompleted ? '' : 'bg-success hover:bg-success/90'}
+            className={isCompleted ? '' : 'bg-success hover:bg-success/90 text-white'}
           >
             {isCompleted ? 'Undo' : 'Complete'}
           </Button>

@@ -174,10 +174,13 @@ export function TasksDashboard({ tasks: initialTasks, onTaskUpdate }: TasksDashb
   }
 
   return (
-    <div className="space-y-6">
+    <div className="p-4 md:p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Tasks</h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold">Tasks</h1>
+          <p className="text-muted-foreground mt-1">Manage and organize your tasks</p>
+        </div>
         <Button 
           onClick={() => setShowTaskForm(true)}
           className="flex items-center gap-2"
@@ -188,7 +191,7 @@ export function TasksDashboard({ tasks: initialTasks, onTaskUpdate }: TasksDashb
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -205,7 +208,7 @@ export function TasksDashboard({ tasks: initialTasks, onTaskUpdate }: TasksDashb
               <SelectValue placeholder="Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="todo">To Do</SelectItem>
               <SelectItem value="in-progress">In Progress</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
@@ -217,7 +220,7 @@ export function TasksDashboard({ tasks: initialTasks, onTaskUpdate }: TasksDashb
               <SelectValue placeholder="Priority" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Priority</SelectItem>
+              <SelectItem value="all">All</SelectItem>
               <SelectItem value="low">Low</SelectItem>
               <SelectItem value="medium">Medium</SelectItem>
               <SelectItem value="high">High</SelectItem>

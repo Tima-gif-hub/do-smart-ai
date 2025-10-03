@@ -1,16 +1,14 @@
 import { ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/hooks/use-toast';
 import {
   LayoutDashboard,
   CheckSquare,
+  BarChart3,
   History,
-  Settings,
-  User,
-  LogOut,
 } from 'lucide-react';
+import { UserMenu } from './UserMenu';
+import { MobileNav } from './MobileNav';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -19,47 +17,25 @@ interface AppLayoutProps {
 export const AppLayout = ({ children }: AppLayoutProps) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuth();
-  const { toast } = useToast();
 
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
+    { icon: BarChart3, label: 'Analytics', path: '/analytics' },
     { icon: History, label: 'History', path: '/history' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
-    { icon: User, label: 'Profile', path: '/profile' },
   ];
-
-  const handleLogout = async () => {
-    try {
-      await logout();
-      toast({
-        title: 'Logged out',
-        description: 'You have been successfully logged out',
-      });
-      navigate('/');
-    } catch (error) {
-      toast({
-        title: 'Error',
-        description: 'Failed to log out',
-        variant: 'destructive',
-      });
-    }
-  };
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex min-h-screen w-full">
-      {/* Sidebar */}
-      <aside className="w-64 border-r bg-card flex flex-col">
+    <div className="flex min-h-screen w-full bg-background">
+      {/* Desktop Sidebar */}
+      <aside className="hidden md:flex w-64 border-r bg-card flex-col">
         <div className="p-6 border-b">
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            AI Task Manager
-          </h1>
+          <h1 className="text-xl font-bold">AI Task Manager</h1>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2">
+        <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => (
             <Button
               key={item.path}
@@ -67,28 +43,29 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
               className="w-full justify-start"
               onClick={() => navigate(item.path)}
             >
-              <item.icon className="mr-2 h-4 w-4" />
+              <item.icon className="mr-3 h-4 w-4" />
               {item.label}
             </Button>
           ))}
         </nav>
-
-        <div className="p-4 border-t">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-destructive hover:text-destructive hover:bg-destructive/10"
-            onClick={handleLogout}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            Sign Out
-          </Button>
-        </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-background">
-        {children}
-      </main>
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <header className="h-16 border-b bg-card flex items-center justify-between px-4 md:px-6">
+          <div className="flex items-center gap-4">
+            <MobileNav />
+            <h2 className="text-lg font-semibold md:hidden">AI Task Manager</h2>
+          </div>
+          <UserMenu />
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-auto">
+          {children}
+        </main>
+      </div>
     </div>
   );
 };

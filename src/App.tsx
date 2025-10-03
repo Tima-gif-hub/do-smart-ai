@@ -10,6 +10,7 @@ import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
 import Tasks from "./pages/Tasks";
+import Analytics from "./pages/Analytics";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
@@ -44,6 +45,16 @@ const App = () => (
                   <ProtectedRoute>
                     <AppLayout>
                       <Tasks />
+                    </AppLayout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/analytics"
+                element={
+                  <ProtectedRoute>
+                    <AppLayout>
+                      <Analytics />
                     </AppLayout>
                   </ProtectedRoute>
                 }
