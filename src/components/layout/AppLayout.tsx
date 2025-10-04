@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   CheckSquare,
   BarChart3,
-  History,
 } from 'lucide-react';
 import { UserMenu } from './UserMenu';
 import { MobileNav } from './MobileNav';
@@ -22,7 +21,6 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
     { icon: BarChart3, label: 'Analytics', path: '/analytics' },
-    { icon: History, label: 'History', path: '/history' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -51,9 +49,9 @@ export const AppLayout = ({ children }: AppLayoutProps) => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-16 border-b bg-card flex items-center justify-between px-4 md:px-6">
+        <header className="h-16 border-b bg-card flex items-center justify-between px-4 md:px-6 flex-shrink-0">
           <div className="flex items-center gap-4">
             <MobileNav />
             <h2 className="text-lg font-semibold md:hidden">AI Task Manager</h2>

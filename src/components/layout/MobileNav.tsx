@@ -7,9 +7,6 @@ import {
   LayoutDashboard,
   CheckSquare,
   BarChart3,
-  History,
-  Settings,
-  User,
 } from 'lucide-react';
 
 export const MobileNav = () => {
@@ -21,9 +18,6 @@ export const MobileNav = () => {
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard' },
     { icon: CheckSquare, label: 'Tasks', path: '/tasks' },
     { icon: BarChart3, label: 'Analytics', path: '/analytics' },
-    { icon: History, label: 'History', path: '/history' },
-    { icon: Settings, label: 'Settings', path: '/settings' },
-    { icon: User, label: 'Profile', path: '/profile' },
   ];
 
   const handleNavigate = (path: string) => {

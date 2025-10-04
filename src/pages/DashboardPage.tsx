@@ -11,6 +11,7 @@ import { tasksApi } from '@/lib/database';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { isBefore } from 'date-fns';
+import { AIAssistantButton } from '@/components/ai/AIAssistantButton';
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -97,8 +98,9 @@ export default function DashboardPage() {
   const recentTasks = tasks.slice(0, 5);
 
   return (
-    <div className="p-4 md:p-6 space-y-6">
-      {/* Greeting */}
+    <>
+      <div className="p-4 md:p-6 space-y-6">
+        {/* Greeting */}
       <div>
         <h1 className="text-3xl font-bold">{getGreeting()}, {user?.name?.split(' ')[0] || 'there'}!</h1>
         <p className="text-muted-foreground mt-1">Here's what you have on your plate today</p>
@@ -221,6 +223,10 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+      
+      {/* AI Assistant Floating Button */}
+      <AIAssistantButton tasks={tasks} />
+    </>
   );
 }

@@ -9,7 +9,7 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import DashboardPage from "./pages/DashboardPage";
-import Tasks from "./pages/Tasks";
+import TasksWrapper from "./pages/TasksWrapper";
 import Analytics from "./pages/Analytics";
 import History from "./pages/History";
 import Settings from "./pages/Settings";
@@ -44,7 +44,7 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <AppLayout>
-                      <Tasks />
+                      <TasksWrapper />
                     </AppLayout>
                   </ProtectedRoute>
                 }

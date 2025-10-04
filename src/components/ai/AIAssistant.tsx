@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Send, Bot, User } from 'lucide-react';
+import { Send, Bot } from 'lucide-react';
 import { AIMessage, Task } from '@/types';
 import { aiApi } from '@/lib/database';
 import { historyApi } from '@/lib/historyApi';
@@ -86,15 +85,15 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ tasks }) => {
   ];
 
   return (
-    <div className="hidden lg:flex w-80 bg-card border-l border-border h-full flex-col">
-      <CardHeader className="border-b border-border">
-        <CardTitle className="flex items-center gap-2">
+    <div className="flex flex-col h-full bg-card">
+      <div className="p-4 border-b border-border">
+        <div className="flex items-center gap-2">
           <Bot className="h-5 w-5 text-primary" />
-          AI Assistant
-        </CardTitle>
-      </CardHeader>
+          <h2 className="text-lg font-semibold">AI Assistant</h2>
+        </div>
+      </div>
       
-      <CardContent className="flex-1 flex flex-col p-0">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {messages.map((message) => (
@@ -169,7 +168,7 @@ export const AIAssistant: React.FC<AIAssistantProps> = ({ tasks }) => {
             </Button>
           </div>
         </div>
-      </CardContent>
+      </div>
     </div>
   );
 };
